@@ -32,21 +32,24 @@ public:
 	float w;
 	float vel[2];
 	float pos[2];
+	unsigned char rg;
 	Box() {
 		w = 20.0f;
 		vel[0] = 0.0f;
 		vel[1] = 0.0f;
 		pos[0] = g.xres / 2.0f;
 		pos[1] = g.yres / 2.0f;
+		rg = 150;
 	}
-	Box(float wid, float v0, float v1, float p0, float p1) {
+	Box(float wid, unsigned char color, float v0, float v1, float p0, float p1) {
 		w = wid;
 		vel[0] = v0;
 		vel[1] = v1;
 		pos[0] = p0;
 		pos[1] = p1;
+		rg = color;
 	}
-} box, particle(2.0, 0.0, 0.0, g.xres/2.0, (g.yres/4.0)*3.0);	
+} box, particle(2.0, 0, 0.0, 0.0, g.xres/2.0, (g.yres/4.0)*3.0);	
 
 Box particles[MAX_PARTICLES];
 int n = 0;
@@ -203,6 +206,10 @@ void make_particle(int x, int y)
 	particles[n].pos[0] = x;
 	particles[n].pos[1] = y;
 	particles[n].vel[0] = particles[n].vel[1] = 0;
+	particles[n].rg += 20*n;
+	if (particles[n].rg < 150){
+		particles[n].rg = 150;
+	}
 	++n;
 }
 
@@ -308,9 +315,11 @@ void physics()
 			particles[i].vel[0] += 0.01;
 		}
 		
+		
 		if (particles[i].pos[1] < 0.0){
-			particles[i] = particles[n];
+			printf("particle %d below boundary\n", i);
 			--n;
+			particles[i] = particles[n];
 		}
 	}
 	
@@ -350,7 +359,7 @@ void render()
 		// Draw particles
 		for  (int i = 0; i < n; i++){
 			glPushMatrix();
-			glColor3ub(150, 160, 250);
+			glColor3ub(particles[i].rg, particles[i].rg, 255);
 			glTranslatef(particles[i].pos[0], particles[i].pos[1], 0.0f);
 			glBegin(GL_QUADS);
 				glVertex2f(-particles[i].w, -particles[i].w);
