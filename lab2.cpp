@@ -17,13 +17,13 @@ using namespace std;
 #include <X11/keysym.h>
 #include <GL/glx.h>
 
-const int MAX_PARTICLES = 10;
+const int MAX_PARTICLES = 2000;
 
 //some structures
 
 class Global {
 public:
-	int xres, yres;
+	int xres, yres, delay;
 	Global();
 } g;
 
@@ -35,8 +35,8 @@ public:
 	float pos[2];
 	unsigned char rg;
 	Box() {
-		w = 40.0f;
-		h = 10.0f;
+		w = 80.0f;
+		h = 20.0f;
 		vel[0] = 0.0f;
 		vel[1] = 0.0f;
 		pos[0] = g.xres / 2.0f;
@@ -101,6 +101,7 @@ int main()
 		physics();
 		render();
 		x11.swapBuffers();
+		g.delay++;
 		usleep(200);
 	}
 	return 0;
@@ -109,7 +110,8 @@ int main()
 Global::Global()
 {
 	xres = 800;
-	yres = 500;
+	yres = 300;
+	delay = 0;
 }
 
 X11_wrapper::~X11_wrapper()
@@ -204,7 +206,6 @@ void make_particle(int x, int y)
 {
 	if (n >= MAX_PARTICLES)
 		return;
-	printf("make particle(%i, %i)\n", x, y);
 	particles[n].w = 2.0f;
 	particles[n].h = 2.0f;
 	particles[n].pos[0] = x;
@@ -307,10 +308,17 @@ void draw(Box item, unsigned char r, unsigned char g, unsigned char b)
 void physics()
 {	
 	
+	// make 5 particles after delay
+	for (int i = 0; i < 5; i++){
+		if (g.delay%10 == 0) {
+			int x = 150 + rand()%30;
+			int y = g.yres - 10 + rand()%10;
+			make_particle(x, y);
+		}
+	}
+	
 	for (int i=0; i < n; i++){
-		particles[i].vel[1] -= .01;
-		particles[i].pos[0] += particles[i].vel[0];
-		particles[i].pos[1] += particles[i].vel[1];
+		particles[i].vel[1] -= .03;
 	
 		// Check for collision for all 5 stationary boxes
 		if (particles[i].pos[1] < (boxReq.pos[1] + boxReq.h) &&
@@ -318,37 +326,39 @@ void physics()
 		    particles[i].pos[1] > (boxReq.pos[1] - boxReq.h) &&
 		    particles[i].pos[0] > (boxReq.pos[0] - boxReq.w)) {
 			particles[i].vel[1] = 0.0;
-			particles[i].vel[0] += 0.01;
+			particles[i].vel[0] += 0.005;
 		} else if (particles[i].pos[1] < (boxDes.pos[1] + boxDes.h) &&
 		           particles[i].pos[0] < (boxDes.pos[0] + boxDes.w) && 
 		           particles[i].pos[1] > (boxDes.pos[1] - boxDes.h) &&
 		           particles[i].pos[0] > (boxDes.pos[0] - boxDes.w)) {
 			particles[i].vel[1] = 0.0;
-			particles[i].vel[0] += 0.01;
+			particles[i].vel[0] += 0.005;
 		} else if (particles[i].pos[1] < (boxCod.pos[1] + boxCod.h) &&
 		           particles[i].pos[0] < (boxCod.pos[0] + boxCod.w) && 
 		           particles[i].pos[1] > (boxCod.pos[1] - boxCod.h) &&
 		           particles[i].pos[0] > (boxCod.pos[0] - boxCod.w)) {
 			particles[i].vel[1] = 0.0;
-			particles[i].vel[0] += 0.01;
+			particles[i].vel[0] += 0.005;
 		} else if (particles[i].pos[1] < (boxTes.pos[1] + boxTes.h) &&
 		           particles[i].pos[0] < (boxTes.pos[0] + boxTes.w) && 
 		           particles[i].pos[1] > (boxTes.pos[1] - boxTes.h) &&
 		           particles[i].pos[0] > (boxTes.pos[0] - boxTes.w)) {
 			particles[i].vel[1] = 0.0;
-			particles[i].vel[0] += 0.01;
+			particles[i].vel[0] += 0.005;
 		} else if (particles[i].pos[1] < (boxMain.pos[1] + boxMain.h) &&
 		           particles[i].pos[0] < (boxMain.pos[0] + boxMain.w) && 
 		           particles[i].pos[1] > (boxMain.pos[1] - boxMain.h) &&
 		           particles[i].pos[0] > (boxMain.pos[0] - boxMain.w)) {
 			particles[i].vel[1] = 0.0;
-			particles[i].vel[0] += 0.01;
+			particles[i].vel[0] += 0.005;
 		}
+		
+		particles[i].pos[0] += particles[i].vel[0];
+		particles[i].pos[1] += particles[i].vel[1];
 		
 		
 		// delete particles that fall off screen
 		if (particles[i].pos[1] < 0.0){
-			printf("particle %d below boundary\n", i);
 			--n;
 			particles[i] = particles[n];
 		}
@@ -359,8 +369,28 @@ void physics()
 void render()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
-	// Draw box
-	draw(boxReq, 150, 200, 120);
+	
+	// Draw main boxes
+	boxReq.pos[0] = 150;
+	boxReq.pos[1] = g.yres - 50;
+	
+	boxDes.pos[0] = 250;
+	boxDes.pos[1] = g.yres - 100;
+	
+	boxCod.pos[0] = 350;
+	boxCod.pos[1] = g.yres - 150;
+	
+	boxTes.pos[0] = 450;
+	boxTes.pos[1] = g.yres - 200;
+	
+	boxMain.pos[0] = 550;
+	boxMain.pos[1] = g.yres - 250;
+	
+	draw(boxReq, 100, 200, 120);
+	draw(boxDes, 100, 200, 120);
+	draw(boxCod, 100, 200, 120);
+	draw(boxTes, 100, 200, 120);
+	draw(boxMain, 100, 200, 120);
 
 		
 	// Draw particles
