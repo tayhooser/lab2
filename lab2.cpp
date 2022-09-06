@@ -310,7 +310,7 @@ void physics()
 	
 	// make 5 particles after delay
 	for (int i = 0; i < 5; i++){
-		if (g.delay%10 == 0) {
+		if (g.delay%5 == 0) {
 			int x = 150 + rand()%30;
 			int y = g.yres - 10 + rand()%10;
 			make_particle(x, y);
@@ -326,31 +326,31 @@ void physics()
 		    particles[i].pos[1] > (boxReq.pos[1] - boxReq.h) &&
 		    particles[i].pos[0] > (boxReq.pos[0] - boxReq.w)) {
 			particles[i].vel[1] = 0.0;
-			particles[i].vel[0] += 0.005;
+			particles[i].vel[0] += float((rand()%20))*.001;
 		} else if (particles[i].pos[1] < (boxDes.pos[1] + boxDes.h) &&
 		           particles[i].pos[0] < (boxDes.pos[0] + boxDes.w) && 
 		           particles[i].pos[1] > (boxDes.pos[1] - boxDes.h) &&
 		           particles[i].pos[0] > (boxDes.pos[0] - boxDes.w)) {
 			particles[i].vel[1] = 0.0;
-			particles[i].vel[0] += 0.005;
+			//particles[i].vel[0] += float((rand()%10))*.001;
 		} else if (particles[i].pos[1] < (boxCod.pos[1] + boxCod.h) &&
 		           particles[i].pos[0] < (boxCod.pos[0] + boxCod.w) && 
 		           particles[i].pos[1] > (boxCod.pos[1] - boxCod.h) &&
 		           particles[i].pos[0] > (boxCod.pos[0] - boxCod.w)) {
 			particles[i].vel[1] = 0.0;
-			particles[i].vel[0] += 0.005;
+			//particles[i].vel[0] += float((rand()%10))*.001;
 		} else if (particles[i].pos[1] < (boxTes.pos[1] + boxTes.h) &&
 		           particles[i].pos[0] < (boxTes.pos[0] + boxTes.w) && 
 		           particles[i].pos[1] > (boxTes.pos[1] - boxTes.h) &&
 		           particles[i].pos[0] > (boxTes.pos[0] - boxTes.w)) {
 			particles[i].vel[1] = 0.0;
-			particles[i].vel[0] += 0.005;
+			//particles[i].vel[0] += float((rand()%10))*.001;
 		} else if (particles[i].pos[1] < (boxMain.pos[1] + boxMain.h) &&
 		           particles[i].pos[0] < (boxMain.pos[0] + boxMain.w) && 
 		           particles[i].pos[1] > (boxMain.pos[1] - boxMain.h) &&
 		           particles[i].pos[0] > (boxMain.pos[0] - boxMain.w)) {
 			particles[i].vel[1] = 0.0;
-			particles[i].vel[0] += 0.005;
+			//particles[i].vel[0] += float((rand()%10))*.001;
 		}
 		
 		particles[i].pos[0] += particles[i].vel[0];
@@ -368,6 +368,16 @@ void physics()
 
 void render()
 {
+	// #include "fonts.h"
+	// 
+	// r.bot = gl.yres - 20;
+	//r.left = 10;
+	//r.center = 0;
+	//ggprint8b(&r, 16, 0x00ff0000, "3350 - Asteroids");
+	//ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
+	//ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", g.nasteroids);
+	
+	
 	glClear(GL_COLOR_BUFFER_BIT);
 	
 	// Draw main boxes
