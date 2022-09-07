@@ -16,6 +16,7 @@ using namespace std;
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
+#include "fonts.h"
 
 const int MAX_PARTICLES = 2000;
 
@@ -41,7 +42,7 @@ public:
 		vel[1] = 0.0f;
 		pos[0] = g.xres / 2.0f;
 		pos[1] = g.yres / 2.0f;
-		rg = 150;
+		rg = 50;
 	}
 	Box(float wid, float hig, unsigned char color, float v0, float v1, float p0, float p1) {
 		w = wid;
@@ -56,6 +57,17 @@ public:
 
 Box particles[MAX_PARTICLES];
 int n = 0;
+
+class Circle {
+public:
+	float pos[2];
+	int r;
+	Circle() {
+		pos[0] = g.xres - 100;
+		pos[1] = -20;
+		r = 120;
+	}
+} circle;
 
 class X11_wrapper {
 private:
@@ -110,7 +122,7 @@ int main()
 Global::Global()
 {
 	xres = 800;
-	yres = 300;
+	yres = 400;
 	delay = 0;
 }
 
@@ -239,7 +251,7 @@ void X11_wrapper::check_mouse(XEvent *e)
 			//Left button was pressed.
 			int y = g.yres - e->xbutton.y;
 			int x = e->xbutton.x;
-			printf("\nmouse pos (%i, %i)", x, y);
+			//printf("\nmouse pos (%i, %i)", x, y);
 			make_particle(x, y);
 			return;
 		}
@@ -289,6 +301,9 @@ void init_opengl(void)
 	glOrtho(0, g.xres, 0, g.yres, -1, 1);
 	//Set the screen background color
 	glClearColor(0.1, 0.1, 0.1, 1.0);
+	// Allow fonts
+	glEnable(GL_TEXTURE_2D);
+	initialize_fonts();
 }
 
 void draw(Box item, unsigned char r, unsigned char g, unsigned char b)
@@ -309,7 +324,7 @@ void physics()
 {	
 	
 	// make 5 particles after delay
-	for (int i = 0; i < 5; i++){
+	for (int i = 0; i < 10; i++){
 		if (g.delay%5 == 0) {
 			int x = 150 + rand()%30;
 			int y = g.yres - 10 + rand()%10;
@@ -353,6 +368,23 @@ void physics()
 			//particles[i].vel[0] += float((rand()%10))*.001;
 		}
 		
+		// Check circle collision		
+		for(float j = 0; j <= 50; j++) { 
+			if (particles[i].pos[0] > circle.pos[0] - (circle.r * cos(j * 2 * 3.1415 / 50)) &&
+				particles[i].pos[0] <= circle.pos[0] &&
+				particles[i].pos[1] < circle.pos[1] + (circle.r * sin(j * 2*  3.1415 / 50))){
+				//printf("collision! particle pos (%f, %f)\n", particles[i].pos[0], particles[i].pos[1]);
+				particles[i].vel[1] = 0.0;	
+				particles[i].vel[0] = -.3 - float((rand()%20))*.01;
+			} else if (particles[i].pos[0] < circle.pos[0] - (circle.r * cos(j * 2 * 3.1415 / 50)) &&
+					   particles[i].pos[0] > circle.pos[0] &&
+					   particles[i].pos[1] < circle.pos[1] + (circle.r * sin(j * 2*  3.1415 / 50))){
+				particles[i].vel[1] = 0.0;	
+				particles[i].vel[0] = .3 + float((rand()%20))*.01;
+			}
+		}
+		
+		// Move particle
 		particles[i].pos[0] += particles[i].vel[0];
 		particles[i].pos[1] += particles[i].vel[1];
 		
@@ -368,41 +400,68 @@ void physics()
 
 void render()
 {
-	// #include "fonts.h"
-	// 
-	// r.bot = gl.yres - 20;
-	//r.left = 10;
-	//r.center = 0;
-	//ggprint8b(&r, 16, 0x00ff0000, "3350 - Asteroids");
-	//ggprint8b(&r, 16, 0x00ffff00, "n bullets: %i", g.nbullets);
-	//ggprint8b(&r, 16, 0x00ffff00, "n asteroids: %i", g.nasteroids);
 	
+	// rectangle for text
+	Rect r;
 	
 	glClear(GL_COLOR_BUFFER_BIT);
 	
 	// Draw main boxes
 	boxReq.pos[0] = 150;
 	boxReq.pos[1] = g.yres - 50;
-	
 	boxDes.pos[0] = 250;
 	boxDes.pos[1] = g.yres - 100;
-	
 	boxCod.pos[0] = 350;
 	boxCod.pos[1] = g.yres - 150;
-	
 	boxTes.pos[0] = 450;
 	boxTes.pos[1] = g.yres - 200;
-	
 	boxMain.pos[0] = 550;
 	boxMain.pos[1] = g.yres - 250;
 	
-	draw(boxReq, 100, 200, 120);
-	draw(boxDes, 100, 200, 120);
-	draw(boxCod, 100, 200, 120);
-	draw(boxTes, 100, 200, 120);
-	draw(boxMain, 100, 200, 120);
+	draw(boxReq, 70, 110, 50);
+	draw(boxDes, 70, 110, 50);
+	draw(boxCod, 70, 110, 50);
+	draw(boxTes, 70, 110, 50);
+	draw(boxMain, 70, 110, 50);
+	
+	// Draw circle	
+	glBegin(GL_TRIANGLE_FAN);
+		glVertex2f(circle.pos[0], circle.pos[1]);
+		for(int i = 0; i <= 50; i++) { 
+			glVertex2f(
+		            circle.pos[0] + (circle.r * cos(i *  2.0 * 3.1415 / 50)), 
+					circle.pos[1] + (circle.r * sin(i * 2.0 * 3.1415 / 50))
+			);
+		}
+	glEnd();
+	glPopMatrix();
+	
+	// Draw text
+	r.bot = g.yres - 20;
+	r.left = 10;
+	r.center = 0;
+	ggprint8b(&r, 16, 0xffffffff, "Waterfall model");
+	
+	r.bot = g.yres - 60;
+	r.left = 93;
+	ggprint16(&r, 16, 0x00ffff00, "Requirements");
+	
+	r.bot = g.yres - 110;
+	r.left = 223;
+	ggprint16(&r, 16, 0x00ffff00, "Design");
+	
+	r.bot = g.yres - 160;
+	r.left = 321;
+	ggprint16(&r, 16, 0x00ffff00, "Coding");
+	
+	r.bot = g.yres - 210;
+	r.left = 418;
+	ggprint16(&r, 16, 0x00ffff00, "Testing");
+	
+	r.bot = g.yres - 260;
+	r.left = 497;
+	ggprint16(&r, 16, 0x00ffff00, "Maintenance");
 
-		
 	// Draw particles
 	for  (int i = 0; i < n; i++){
 		draw(particles[i], particles[i].rg, particles[i].rg, 255);

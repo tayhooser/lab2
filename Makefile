@@ -1,8 +1,10 @@
+CFLAGS = -I ./include
+LFLAGS = -lrt -lX11 -lGLU -lGL -pthread -lm #-lXrandr
 
 all: lab2
 
 lab2: lab2.cpp
-	g++ lab2.cpp -Wall -olab2 -lX11 -lGL -lGLU -lm
+	g++ $(CFLAGS) lab2.cpp libggfonts.a -Wall -Wextra $(LFLAGS) -olab2
 
 clean:
 	rm -f lab2
