@@ -333,7 +333,7 @@ void physics()
 	}
 	
 	for (int i=0; i < n; i++){
-		particles[i].vel[1] -= .03;
+		particles[i].vel[1] -= .04;
 	
 		// Check for collision for all 5 stationary boxes
 		if (particles[i].pos[1] < (boxReq.pos[1] + boxReq.h) &&
@@ -369,18 +369,18 @@ void physics()
 		}
 		
 		// Check circle collision		
-		for(float j = 0; j <= 50; j++) { 
-			if (particles[i].pos[0] > circle.pos[0] - (circle.r * cos(j * 2 * 3.1415 / 50)) &&
+		for(float j = 0; j <= 200; j++) { 
+			if (particles[i].pos[0] > circle.pos[0] - (circle.r * cos(j * 2 * 3.1415 / 200)) &&
 				particles[i].pos[0] <= circle.pos[0] &&
-				particles[i].pos[1] < circle.pos[1] + (circle.r * sin(j * 2*  3.1415 / 50))){
+				particles[i].pos[1] < circle.pos[1] + (circle.r * sin(j * 2*  3.1415 / 200))){
 				//printf("collision! particle pos (%f, %f)\n", particles[i].pos[0], particles[i].pos[1]);
 				particles[i].vel[1] = 0.0;	
-				particles[i].vel[0] = -.3 - float((rand()%20))*.01;
-			} else if (particles[i].pos[0] < circle.pos[0] - (circle.r * cos(j * 2 * 3.1415 / 50)) &&
+				particles[i].vel[0] = -.5 - float((rand()%20))*.01;
+			} else if (particles[i].pos[0] < circle.pos[0] - (circle.r * cos(j * 2 * 3.1415 / 200)) &&
 					   particles[i].pos[0] > circle.pos[0] &&
-					   particles[i].pos[1] < circle.pos[1] + (circle.r * sin(j * 2*  3.1415 / 50))){
+					   particles[i].pos[1] < circle.pos[1] + (circle.r * sin(j * 2*  3.1415 / 200))){
 				particles[i].vel[1] = 0.0;	
-				particles[i].vel[0] = .3 + float((rand()%20))*.01;
+				particles[i].vel[0] = .5 + float((rand()%20))*.01;
 			}
 		}
 		
